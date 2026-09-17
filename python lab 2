@@ -1,0 +1,18 @@
+import random as rng
+
+def take_input()
+    guess = input("left or right?")
+    if guess == "left":
+        guess_num = 1
+    elif guess == "right":
+        guess_num = 2
+    return guess_num
+
+def start_game():
+    print("Welcome to the game!")
+    print("I will ask you to choose left or right.")
+
+def main():
+    start_game()
+    while True:
+
