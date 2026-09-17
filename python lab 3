@@ -77,6 +77,6 @@ def main():
         if result is not None:
             print(f"Result: {result}")
 
-num_1, operator, num_2 = "test", "test", "test"
 
-main()
+if __name__ == "__main__":
+    main()
