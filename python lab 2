@@ -1,6 +1,6 @@
 import random as rng
 
-def take_input()
+def take_input():
     guess = input("left or right?")
     if guess == "left":
         guess_num = 1
@@ -11,8 +11,15 @@ def take_input()
 def start_game():
     print("Welcome to the game!")
     print("I will ask you to choose left or right.")
+    return 
 
 def main():
     start_game()
     while True:
+        number = rng.randint(1, 2)
+        guess_num = take_input()
+        if guess_num == number:
+            print("You guessed correctly!")
+        else:
+            print("Wrong! The correct answer was", "left" if number == 1 else "right")
 
