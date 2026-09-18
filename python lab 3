@@ -1,7 +1,11 @@
 
 def start():
+    global prev_ans
+    prev_ans = 0.0
     print("Welcome to Cole's Calc")
+    print("(calc is short for calculator if you didn't know)")
     print("press q to quit")
+    print("press ans to use the previous answer")
 
 def check_if_number(num):
     try:
@@ -12,10 +16,12 @@ def check_if_number(num):
 
 def take_num_1():
     while True:
-        num_1 = input("Enter first number: ")
-        if num_1 == "q":
+        num_1 = input("Enter first number: ").strip()
+        if num_1.lower() == "q":
             print("goodbye calc")
             quit()
+        elif num_1.lower() == "ans":
+            return prev_ans
         elif check_if_number(num_1):
             return float(num_1)
         else:
@@ -23,10 +29,12 @@ def take_num_1():
 
 def take_num_2():
     while True:
-        num_2 = input("Enter second number: ")
-        if num_2 == "q":
+        num_2 = input("Enter second number: ").strip()
+        if num_2.lower() == "q":
             print("goodbye calc")
             quit()
+        elif num_2.lower() == "ans":
+            return prev_ans
         elif check_if_number(num_2):
             return float(num_2)
         else:
@@ -53,6 +61,7 @@ def explain():
     print("(a)ddition, (s)ubtraction, (m)ultiplication, (d)ivision")
 
 def calculate(num_1, operator, num_2):
+    global prev_ans
     if operator == "a":
         return num_1 + num_2
     elif operator == "s":
@@ -69,12 +78,14 @@ def calculate(num_1, operator, num_2):
             return None
 
 def main():
+    global prev_ans
     start()
     while True:
         explain()
         num_1, operator, num_2 = take_input()
         result = calculate(num_1, operator, num_2)
         if result is not None:
+            prev_ans = result
             print(f"Result: {result}")
 
 
