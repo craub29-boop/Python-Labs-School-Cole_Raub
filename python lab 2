@@ -1,36 +1,58 @@
 import random as rng
+from turtle import distance
 
+def check_if_number(num):
+    try:
+        float(num)
+        return True
+    except ValueError:
+        return False
 
 def take_input():
-    while True:
-        guess = input("left or right? ").strip().lower()
-        if guess == "left":
-            return 1
-        if guess == "right":
-            return 2
-        print("Please type 'left' or 'right'.")
+    global num
+    global guess_amount
 
+    while True:
+        guess = input("guess a number between 1 and 10: ")
+        if check_if_number(guess):
+            guess_amount += 1
+            return int(guess)
+        print("Please enter a valid number.")
+
+def rng_number():
+    global num
+    return rng.randint(1, 10)
 
 def start_game():
-    print("Welcome to the game!")
-    print("I will ask you to choose left or right.")
+    global guess_amount
+    global num
+    print("Hola")
+    print("I will ask you to guess a number between 1 and 10.")
+    guess = "test1"
+    num = int(rng_number())
+    guess_amount = 0
+
+
+def check_guess(guess, num):
+    global guess_amount
+
+    distance = abs(guess - num)
+    if distance == 0:
+        print("correct")
+        print("It took you " + str(guess_amount) + " tries.")
+        guess_amount = 0
+        return True
+    return False
 
 
 def main():
+    global num
+    global guess_amount
     start_game()
     while True:
-        number = rng.randint(1, 2)
-        guess_num = take_input()
-
-        if guess_num == number:
-            print("Correct")
-        else:
-            print("Wrong! Answer:", "left" if number == 1 else "right")
-
-        play_again = input("Play again? (y/n): ").strip().lower()
-        if play_again != "y":
-            print("bye")
-            break
+        guess = take_input()
+        if check_guess(guess, num):
+            num = int(rng_number())
 
 
 if __name__ == "__main__":
