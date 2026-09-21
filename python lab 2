@@ -36,13 +36,20 @@ def start_game():
 def check_guess(guess, num):
     global guess_amount
 
-    distance = abs(guess - num)
+    distance = guess - num
     if distance == 0:
         print("correct")
         print("It took you " + str(guess_amount) + " tries.")
         guess_amount = 0
         return True
     return False
+
+def above_or_below(guess, num):
+    distance = num - guess
+    if distance > 0:
+        print("higher")
+    elif distance < 0:
+        print("lower")
 
 
 def main():
@@ -51,6 +58,7 @@ def main():
     start_game()
     while True:
         guess = take_input()
+        above_or_below(guess, num)
         if check_guess(guess, num):
             num = int(rng_number())
 
