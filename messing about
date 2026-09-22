@@ -36,17 +36,34 @@ def take_color():
     elif color_input not in ["y", "g", "gr"]:
         print("enter valid color")
         return False 
+# 3 lists, green, yellow, gray 
+def assign_list(color, guess):
+    global green_list
+    global yellow_list
+    global gray_list
 
-def take_color_5()
+    green_list = []
+    yellow_list = []
+    gray_list = []
 
+    for i in range(len(guess)):
+        if color[i] == "g":
+            green_list.append(guess[i])
+        elif color[i] == "y":
+            yellow_list.append(guess[i])
+        elif color[i] == "gr":
+            gray_list.append(guess[i])
+
+def gen_rand_char():
+    return chr(rand.randint(97, 122))
 class Guess:
     def __init__(self, word, color1, color2, color3, color4, color5):
         self.word = word 
-        self.color1 = color1
-        self.color2 = color2
-        self.color3 = color3
-        self.color4 = color4
-        self.color5 = color5
+        self.color = [color1, color2, color3, color4, color5]
 
-guess1 = Guess("test1", "g", "y", "gr", "y", "g")
 
+guess1 = Guess( word_input(), take_color(), take_color(), take_color(), take_color(), take_color())
+
+assign_list(guess1.color, guess1.word)
+
+print(green_list)
