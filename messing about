@@ -37,6 +37,8 @@ def take_color():
         print("enter valid color")
         return False 
 
+def take_color_5()
+
 class Guess:
     def __init__(self, word, color1, color2, color3, color4, color5):
         self.word = word 
@@ -45,4 +47,6 @@ class Guess:
         self.color3 = color3
         self.color4 = color4
         self.color5 = color5
+
+guess1 = Guess("test1", "g", "y", "gr", "y", "g")
 
