@@ -62,6 +62,7 @@ class Guess:
         self.color = [color1, color2, color3, color4, color5]
 
 
+
 guess1 = Guess( word_input(), take_color(), take_color(), take_color(), take_color(), take_color())
 
 assign_list(guess1.color, guess1.word)
