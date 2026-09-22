@@ -1,0 +1,48 @@
+import time 
+import random as rand
+
+def explain():
+    print("first type in guess, then type in color")
+    print("type y for yellow, g for green, and gr for gray")
+
+
+#takes and filters word input 
+
+def word_input():
+    user_input = input("input: ").strip().lower()
+
+    x = 0
+
+    if user_input == "":
+        quit()
+    elif len(user_input) != 5:
+        print("enter a 5-letter word")
+        return False
+
+    while x < len(user_input):
+        if user_input[x] < 'a' or user_input[x] > 'z':
+            print("enter leters only")
+            return False
+        else:
+            x += 1
+    return user_input
+
+#takes and filters color input
+
+def take_color():
+    color_input = input("color: ").strip().lower()
+    if color_input == "":
+        quit()
+    elif color_input not in ["y", "g", "gr"]:
+        print("enter valid color")
+        return False 
+
+class Guess:
+    def __init__(self, word, color1, color2, color3, color4, color5):
+        self.word = word 
+        self.color1 = color1
+        self.color2 = color2
+        self.color3 = color3
+        self.color4 = color4
+        self.color5 = color5
+
