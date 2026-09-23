@@ -1,0 +1,185 @@
+from collections import Counter
+from pathlib import Path
+
+WORD_LENGTH = 5
+VALID_COLORS = {"g", "y", "gr"}
+
+
+def explain():
+    print("Wordle rules:")
+    print("- g = green (correct letter in correct place)")
+    print("- y = yellow (letter is in the word, but not in that spot)")
+    print("- gr = gray (letter is not in the word)")
+    print("Enter the guess as a 5-letter word, then enter the colors as 5 values.")
+    print("Example: g y gr g g")
+
+
+def find_word_list():
+    possible_files = [
+        Path(__file__).with_name("word_list.txt"),
+        Path(__file__).with_name("words.txt"),
+        Path(__file__).with_name("wordle_words.txt"),
+        Path.cwd() / "word_list.txt",
+        Path.cwd() / "words.txt",
+        Path.cwd() / "wordle_words.txt",
+    ]
+    for path in possible_files:
+        if path.exists():
+            return path
+    return Path(__file__).with_name("word_list.txt")
+
+
+def load_word_list(file_path=None):
+    file_path = Path(file_path) if file_path else find_word_list()
+
+    if not file_path.exists():
+        raise FileNotFoundError(f"Word list not found: {file_path}")
+
+    words = []
+    with file_path.open("r", encoding="utf-8") as handle:
+        for line in handle:
+            word = line.strip().lower()
+            if len(word) == WORD_LENGTH and word.isalpha():
+                words.append(word)
+
+    if not words:
+        raise ValueError(f"No valid 5-letter words found in {file_path}")
+
+    return words
+
+
+def word_input(prompt="guess: "):
+    while True:
+        user_input = input(prompt).strip().lower()
+        if len(user_input) != WORD_LENGTH or not user_input.isalpha():
+            print("Enter a valid 5-letter word.")
+            continue
+        return user_input
+
+
+def parse_clue(raw_clue):
+    cleaned = raw_clue.strip().lower().replace(",", " ").replace("|", " ")
+    tokens = cleaned.split()
+
+    if not tokens:
+        raise ValueError("No color values entered.")
+
+    if len(tokens) == WORD_LENGTH and all(token in VALID_COLORS for token in tokens):
+        return tokens
+
+    if len(cleaned) == WORD_LENGTH and all(char in {"g", "y"} for char in cleaned):
+        return list(cleaned)
+
+    raise ValueError("Use 5 color values like: g y gr g g")
+
+
+def take_color():
+    while True:
+        try:
+            raw = input("color: ").strip()
+            clue = parse_clue(raw)
+            if len(clue) == WORD_LENGTH:
+                return clue
+        except ValueError:
+            print("Enter valid colors: g, y, or gr. Example: g y gr g g")
+
+
+def evaluate_guess(secret, guess):
+    if len(secret) != WORD_LENGTH or len(guess) != WORD_LENGTH:
+        raise ValueError("Both words must be 5 letters long.")
+
+    result = ["gr"] * WORD_LENGTH
+    remaining_letters = Counter()
+
+    for index, (secret_letter, guess_letter) in enumerate(zip(secret, guess)):
+        if secret_letter == guess_letter:
+            result[index] = "g"
+        else:
+            remaining_letters[secret_letter] += 1
+
+    for index, guess_letter in enumerate(guess):
+        if result[index] == "g":
+            continue
+        if remaining_letters.get(guess_letter, 0) > 0:
+            result[index] = "y"
+            remaining_letters[guess_letter] -= 1
+
+    return result
+
+
+def matches_clue(candidate, guess, clue):
+    return evaluate_guess(candidate, guess) == clue
+
+
+def filter_words(words, guess, clue):
+    filtered = [word for word in words if matches_clue(word, guess, clue)]
+    return filtered
+
+
+def suggest_word(words):
+    if not words:
+        return None
+
+    letter_scores = Counter()
+    for word in words:
+        for letter in set(word):
+            letter_scores[letter] += 1
+
+    best_word = min(
+        words,
+        key=lambda word: (
+            -sum(letter_scores[letter] for letter in set(word)),
+            word,
+        ),
+    )
+    return best_word
+
+
+def main():
+    explain()
+
+    try:
+        words = load_word_list()
+    except FileNotFoundError as exc:
+        print(f"{exc}\nCreate a word_list.txt file in the same folder with 5-letter words, one per line.")
+        return
+    except ValueError as exc:
+        print(f"{exc}")
+        return
+
+    print(f"Loaded {len(words)} possible words from the text file.")
+
+    while True:
+        try:
+            guess = word_input("guess: ")
+            clue = take_color()
+            words = filter_words(words, guess, clue)
+
+            if not words:
+                print("No words match those rules. Check the clue and try again.")
+                continue
+
+            print(f"Words left: {len(words)}")
+            print("Possible words:", words[:10])
+            print("Best next guess:", suggest_word(words))
+
+            try:
+                again = input("Do you want to enter another guess? (y/n): ").strip().lower()
+            except EOFError:
+                print("\nInput closed. Exiting Wordle solver.")
+                return
+
+            if again in {"n", "no"}:
+                break
+        except KeyboardInterrupt:
+            print("\nProgram closed.")
+            break
+        except EOFError:
+            print("\nInput closed. Exiting Wordle solver.")
+            return
+
+
+if __name__ == "__main__":
+    main()
+
+
