@@ -15,18 +15,24 @@ def explain():
 
 
 def find_word_list():
-    possible_files = [
-        Path(__file__).with_name("word_list.txt"),
-        Path(__file__).with_name("words.txt"),
-        Path(__file__).with_name("wordle_words.txt"),
-        Path.cwd() / "word_list.txt",
-        Path.cwd() / "words.txt",
-        Path.cwd() / "wordle_words.txt",
+    search_roots = [
+        Path(__file__).resolve().parent,
+        Path.cwd(),
     ]
-    for path in possible_files:
-        if path.exists():
-            return path
-    return Path(__file__).with_name("word_list.txt")
+
+    candidate_names = ["word_list.txt", "words.txt", "wordle_words.txt"]
+
+    for root in search_roots:
+        for name in candidate_names:
+            candidate = root / name
+            if candidate.exists():
+                return candidate
+
+        for path in root.rglob("*"):
+            if path.is_file() and path.name.lower() in {name.lower() for name in candidate_names}:
+                return path
+
+    return Path(__file__).resolve().parent / "word_list.txt"
 
 
 def load_word_list(file_path=None):
@@ -63,6 +69,9 @@ def parse_clue(raw_clue):
 
     if not tokens:
         raise ValueError("No color values entered.")
+
+    if len(tokens) == 1 and tokens[0] == "gr":
+        return ["gr"] * WORD_LENGTH
 
     if len(tokens) == WORD_LENGTH and all(token in VALID_COLORS for token in tokens):
         return tokens
@@ -116,22 +125,73 @@ def filter_words(words, guess, clue):
     return filtered
 
 
-def suggest_word(words):
+def suggest_word(words, full_words=None):
     if not words:
         return None
+
+    if full_words is None:
+        full_words = words
+    full_words = [word.lower() for word in full_words if len(word) == WORD_LENGTH and word.isalpha()]
+
+    if 3 <= len(words) <= 5:
+        varying_positions = []
+        for index in range(WORD_LENGTH):
+            if len({word[index] for word in words}) > 1:
+                varying_positions.append(index)
+
+        if len(varying_positions) == 1:
+            index = varying_positions[0]
+            varying_letters = {word[index] for word in words}
+            fixed_letters = set()
+
+            for fixed_index in range(WORD_LENGTH):
+                if fixed_index == index:
+                    continue
+                letter_set = {word[fixed_index] for word in words}
+                if len(letter_set) == 1:
+                    fixed_letters.update(letter_set)
+
+            if len(varying_letters) >= 2:
+                def cluster_score(candidate):
+                    candidate_set = set(candidate)
+                    differing_match = len(candidate_set & varying_letters)
+                    shared_match = len(candidate_set & fixed_letters)
+                    total_match = len(candidate_set & (varying_letters | fixed_letters))
+                    return (differing_match, shared_match, total_match, candidate)
+
+                best_word = sorted(full_words, key=lambda word: (-cluster_score(word)[0], -cluster_score(word)[1], -cluster_score(word)[2], word))[0]
+                if best_word:
+                    return best_word
 
     letter_scores = Counter()
     for word in words:
         for letter in set(word):
             letter_scores[letter] += 1
 
-    best_word = min(
-        words,
-        key=lambda word: (
-            -sum(letter_scores[letter] for letter in set(word)),
-            word,
-        ),
-    )
+    all_letters = set("".join(words))
+
+    if len(words) >= 3:
+        max_hamming = 0
+        for i, left in enumerate(words):
+            for right in words[i + 1:]:
+                diff = sum(a != b for a, b in zip(left, right))
+                max_hamming = max(max_hamming, diff)
+
+        if max_hamming <= 2:
+            def cluster_score(word):
+                covered_letters = sum(1 for letter in all_letters if letter in set(word))
+                frequency_score = sum(letter_scores[letter] for letter in set(word))
+                return (covered_letters, frequency_score, word)
+
+            candidates = full_words if full_words else words
+            return max(candidates, key=cluster_score)
+
+    def score(word):
+        covered_letters = sum(1 for letter in all_letters if letter in set(word))
+        frequency_score = sum(letter_scores[letter] for letter in set(word))
+        return (covered_letters, frequency_score, -len(set(word)), word)
+
+    best_word = max(full_words, key=score)
     return best_word
 
 
@@ -139,7 +199,8 @@ def main():
     explain()
 
     try:
-        words = load_word_list()
+        all_words = load_word_list()
+        words = all_words[:]
     except FileNotFoundError as exc:
         print(f"{exc}\nCreate a word_list.txt file in the same folder with 5-letter words, one per line.")
         return
@@ -161,7 +222,12 @@ def main():
 
             print(f"Words left: {len(words)}")
             print("Possible words:", words[:10])
-            print("Best next guess:", suggest_word(words))
+
+            if len(words) == 1:
+                print(f"The answer is: {words[0]}")
+                break
+
+            print("Best next guess:", suggest_word(words, full_words=all_words))
 
             try:
                 again = input("Do you want to enter another guess? (y/n): ").strip().lower()

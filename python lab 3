@@ -1,4 +1,4 @@
-
+#setup da stuff
 def start():
     global prev_ans
     prev_ans = 0.0
@@ -7,6 +7,7 @@ def start():
     print("press q to quit")
     print("press ans to use the previous answer")
 
+#checks if number via rounding(you cant round strings)
 def check_if_number(num):
     try:
         float(num)
@@ -14,6 +15,7 @@ def check_if_number(num):
     except ValueError:
         return False
 
+#takes and filters the first number input
 def take_num_1():
     while True:
         num_1 = input("Enter first number: ").strip()
@@ -27,6 +29,7 @@ def take_num_1():
         else:
             print("Enter a valid number or 'q' to quit.")
 
+#takes and filters the second number input
 def take_num_2():
     while True:
         num_2 = input("Enter second number: ").strip()
@@ -40,6 +43,7 @@ def take_num_2():
         else:
             print("Enter a valid number or 'q' to quit.")
 
+#takes and filters the operator input
 def take_operator():
     while True:
         operator = input("Enter operator: ").strip().lower()
@@ -51,15 +55,18 @@ def take_operator():
         else:
             print("Enter a valid operator or 'q' to quit.")
 
+#combines all inputs into one function to call
 def take_input():
     num_1 = take_num_1()
     operator = take_operator()
     num_2 = take_num_2()
     return num_1, operator, num_2
 
+#explains how it works 
 def explain():
     print("(a)ddition, (s)ubtraction, (m)ultiplication, (d)ivision")
 
+#evaluates the math 
 def calculate(num_1, operator, num_2):
     global prev_ans
     if operator == "a":
@@ -77,6 +84,7 @@ def calculate(num_1, operator, num_2):
             quit()
             return None
 
+#holds the actual structure 
 def main():
     global prev_ans
     start()
@@ -86,8 +94,10 @@ def main():
         result = calculate(num_1, operator, num_2)
         if result is not None:
             prev_ans = result
+            if result == 67:
+                print("6767676767676767676776767676776767676776767676776")
             print(f"Result: {result}")
 
-
+#runs code 
 if __name__ == "__main__":
     main()
