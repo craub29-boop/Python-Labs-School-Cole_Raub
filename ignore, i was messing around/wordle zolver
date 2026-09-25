@@ -20,7 +20,7 @@ def find_word_list():
         Path.cwd(),
     ]
 
-    candidate_names = ["word_list.txt", "words.txt", "wordle_words.txt"]
+    candidate_names = ["word_list.txt", "words.txt", "wordle_words.txt", "valid-wordle-words.txt"]
 
     for root in search_roots:
         for name in candidate_names:
